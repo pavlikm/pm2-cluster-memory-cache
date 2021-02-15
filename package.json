@@ -1,0 +1,14 @@
+{
+  "name": "pm2-cluster-cache",
+  "version": "1.0.0",
+  "description": "pm2 cluster memory cache with ttl and more possibilities of data store in cluster",
+  "main": "src/ClusterCache.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "pavlikm",
+  "license": "MIT",
+  "dependencies": {
+    "pm2": "^4.5.4"
+  }
+}
