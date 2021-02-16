@@ -14,7 +14,7 @@ var DataRepository = {
     },
 
     get: function (key) {
-        return DataRepository.isValid(DataRepository.data[key]) ? DataRepository.data[key] : undefined;
+        return DataRepository.isValid(DataRepository.data[key]) ? DataRepository.data[key] : null;
     },
 
     set: function (key, data) {

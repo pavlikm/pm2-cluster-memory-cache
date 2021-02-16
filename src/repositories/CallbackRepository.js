@@ -12,7 +12,7 @@ var CallbackRepository = {
 
     run: function (cbId, data) {
         if (CallbackRepository.callbacks.hasOwnProperty(cbId)) {
-            ClusterCache.callbacks[cbId](data);
+            CallbackRepository.callbacks[cbId](data);
         }
     },
 
@@ -29,7 +29,7 @@ var CallbackRepository = {
 
 module.exports = {
     run: CallbackRepository.run,
-    reigster: CallbackRepository.register,
+    register: CallbackRepository.register,
     delete: CallbackRepository.delete,
     optimize: CallbackRepository.optimize
 };

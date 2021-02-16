@@ -3,12 +3,17 @@
   "version": "1.0.0",
   "description": "pm2 cluster memory cache with ttl and more possibilities of data store in cluster",
   "main": "src/ClusterCache.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:pavlikm/pm2-cluster-memory-cache.git"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cd test && npm install && npm run test"
   },
   "author": "pavlikm",
   "license": "MIT",
   "dependencies": {
     "pm2": "^4.5.4"
-  }
+  },
+  "devDependencies": {}
 }

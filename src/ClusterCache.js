@@ -31,7 +31,7 @@ var ClusterCache = {
                 if (data != null && 'v' in data) {
                     cr.run(packet.callbackId, data.v);
                 } else {
-                    cr.run(packet.callbackId, undefined);
+                    cr.run(packet.callbackId, null);
                 }
                 cr.delete(packet.callbackId);
             }
@@ -49,10 +49,10 @@ var ClusterCache = {
     _getFromProc: function (key, cb, proc) {
         if (parseInt(proc) === parseInt(process.env.pm_id)) {
             let data = dr.get(key);
-            if (data !== undefined) {
+            if (data !== null) {
                 return cb(data.v);
             } else {
-                return cb(undefined);
+                return cb(null);
             }
         }
         let callbackId = cr.register(cb);
@@ -64,6 +64,7 @@ var ClusterCache = {
             },
             topic: TOPIC_GET
         }, function (e) {
+
         });
     },
 
@@ -96,7 +97,7 @@ var ClusterCache = {
                 },
                 topic: TOPIC_SET
             }, function (e) {
-
+                cb();
             });
         }
     }

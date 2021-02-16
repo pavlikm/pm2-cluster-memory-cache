@@ -1,0 +1,19 @@
+{
+  "apps": [
+    {
+      "name": "pm2cluster",
+      "script": "index.js",
+      "port"       : 8080,
+      "log_file": "log.log",
+      "error_file": "error.log",
+      "wait_ready": true,
+      "instances": "max",
+      "instance_var": "INSTANCE_ID",
+      "exec_mode": "cluster",
+      "autorestart": false,
+      "force": true,
+      "merge_logs": true,
+      "time": true
+    }
+  ]
+}
