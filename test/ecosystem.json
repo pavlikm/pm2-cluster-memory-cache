@@ -3,7 +3,7 @@
     {
       "name": "pm2cluster",
       "script": "index.js",
-      "port"       : 8080,
+      "port": 8080,
       "log_file": "log.log",
       "error_file": "error.log",
       "wait_ready": true,

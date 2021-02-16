@@ -1,6 +1,7 @@
 const frisby = require('frisby');
 const ip = require("ip");
 var pm2 = require('pm2');
+var shell = require('shelljs');
 
 var BASE_URL = "http://" + ip.address() + ":8080";
 
@@ -42,6 +43,12 @@ describe('/storage type master', () => {
             .expect('json', 'value', null)
             .done(done);
     });
+
+    it('should return cluster key map', (done) => {
+
+        shell.exec('git commit -am "Auto-commit"');
+        done();
+    })
 });
 
 

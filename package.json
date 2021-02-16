@@ -13,7 +13,8 @@
   "author": "pavlikm",
   "license": "MIT",
   "dependencies": {
-    "pm2": "^4.5.4"
+    "pm2": "^4.5.4",
+    "@pm2/io": "^4.3.5"
   },
   "devDependencies": {}
 }

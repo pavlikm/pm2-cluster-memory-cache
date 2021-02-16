@@ -1,4 +1,5 @@
 const pm2 = require("pm2");
+var pmx = require('@pm2/io');
 import {cr, dr, pr} from './repositories';
 import {STORAGE_CLUSTER, TOPIC_GET, TOPIC_GET_RESPONSE, TOPIC_SET} from "./const";
 
@@ -11,6 +12,9 @@ var ClusterCache = {
 
     init: function (options) {
         Object.assign(ClusterCache.options, options);
+        pmx.action('keys', function(reply) {
+            reply({ keys : dr.keys() });
+        });
         process.on('message', function (packet) {
             let data = packet.data;
 
@@ -37,6 +41,19 @@ var ClusterCache = {
             }
         });
         return this;
+    },
+
+    keys: function () {
+        return dr.keys();
+    },
+
+    delete: function(key, cb){
+        pr.getWriteProcess(key, ClusterCache.options.storage).then(processes => {
+            processes.forEach((proc) =>  {
+                //ClusterCache._deleteFromProc(key, cb, proc);
+            })
+
+        });
     },
 
     get: function (key, cb) {
@@ -74,30 +91,30 @@ var ClusterCache = {
         }
         pr.getWriteProcess(key, ClusterCache.options.storage).then(processes => {
             processes.forEach((p) => {
-                ClusterCache._setToProc(key, value, ttl, cb, p);
+                ClusterCache._setToProc(key, value, ttl, p);
             });
+            cb();
         });
     },
 
-    _setToProc: function (key, value, ttl, cb, proc) {
+    _setToProc: function (key, value, ttl, proc) {
         if (parseInt(proc) === parseInt(process.env.pm_id)) {
             let data = {
                 k: key,
                 v: value,
-                t: new Date().getTime() + (ttl * 1000)
+                t: new Date().getTime() + ttl
             };
             dr.set(key, data);
-            if(cb !== undefined) return cb();
         } else {
             pm2.sendDataToProcessId(proc, {
                 data: {
                     k: key,
                     v: value,
-                    t: new Date().getTime() + (ttl * 1000)
+                    t: new Date().getTime() + ttl
                 },
                 topic: TOPIC_SET
             }, function (e) {
-                cb();
+
             });
         }
     }
@@ -106,5 +123,7 @@ var ClusterCache = {
 module.exports = {
     get: ClusterCache.get,
     set: ClusterCache.set,
+    delete: ClusterCache.delete,
+    keys: ClusterCache.keys,
     init: ClusterCache.init
 };

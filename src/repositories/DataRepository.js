@@ -4,6 +4,10 @@ var DataRepository = {
 
     data: {},
 
+    keys: function(){
+        return Object.keys(DataRepository.data);
+    },
+
     optimize: function () {
         for (const [key, record] of Object.entries(DataRepository.data)) {
             if (!DataRepository.isValid(record)) {
@@ -41,5 +45,6 @@ module.exports = {
     get: DataRepository.get,
     set: DataRepository.set,
     delete: DataRepository.delete,
-    optimize: DataRepository.optimize
+    optimize: DataRepository.optimize,
+    keys: DataRepository.keys
 };

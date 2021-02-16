@@ -16,8 +16,8 @@ app.get("/get", (req, res) => {
     cache.get(req.query.key, (data) => {
         res.send({key: req.query.key, value: data});
     });
-    //res.send({key: req.query.key, value: undefined});
 });
+
 
 server.listen(8080, () => {
     //console.log(`Server started`, process.env.npm_lifecycle_event);

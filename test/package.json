@@ -16,7 +16,10 @@
   },
   "author": "pavlikm",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "cli": "^1.0.1",
+    "shelljs": "^0.8.4"
+  },
   "devDependencies": {
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
@@ -24,6 +27,7 @@
     "frisby": "^2.1.3",
     "ip": "^1.1.5",
     "jasmine": "^3.6.4",
-    "pm2": "^4.5.4"
+    "pm2": "^4.5.4",
+    "@pm2/io": "^4.3.5"
   }
 }
