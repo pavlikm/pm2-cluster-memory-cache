@@ -5,20 +5,28 @@ const app = express();
 const server = http.createServer(app);
 import ClusterCache from '../src/ClusterCache';
 
-let cache = ClusterCache.init({storage: process.env.npm_lifecycle_event || "cluster"});
+let cache = ClusterCache.init({storage: process.env.npm_lifecycle_event || "master"});
 
 app.get("/set", (req, res) => {
     let key = req.query.key;
-    let data = req.query.data;
+    let data = req.query.value;
     let ttl = req.query.ttl;
-    cache.set(key, data, ttl).then(metadata => {
-        res.send({key: key, value: data, metadata: metadata});
+    cache.set(key, data, ttl).then(meta => {
+        res.send({key: key, value: data, metadata: meta});
     });
 });
 
 app.get("/get", (req, res) => {
-    cache.get(req.query.key, 'defaultValue').then(data => {
-        res.send({key: req.query.key, value: data});
+    let key = req.query.key;
+    let defaultValue = req.query.default || 'undefined';
+    cache.get(key, defaultValue).then(result => {
+        res.send({key: key, value: result.data, metadata: result.metadata});
+    });
+});
+
+app.get("/delete", (req, res) => {
+    cache.delete(req.query.key).then(data => {
+        res.send(data);
     });
 });
 

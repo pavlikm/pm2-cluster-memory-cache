@@ -10,6 +10,8 @@ npm install pm2-cluster-cache --save
 ```javascript
 npm run test
 ```
+**Remember**: testing environment may vary depending on storage types. Therefore tests are divided into 4 separate running tests. If you run `npm run test`, all test will be performed, but you can run specific test, for example `npm run cluster` for cluster type, or `npm run master` for master type, and so on. Every test will create server with max processes, and test against api running on this cluster server.
+ 
 
 ### Usage
 ```javascript
@@ -45,4 +47,7 @@ cache.keys().then(map => {
 - `get(key, [defaultValue])` get value stored under key 'key'. If value not find, value of param `defaultValue` will be returned in Promise.
 - `delete(key)` removes key from all process where is given key stored. Returns in Promise array of processes deleted from.
 - `keys()` returns in Promise map of cluster with numbers of stored keys.
+
+### PM2 metrics
+with command `pm2 describe <your app name>` you can see in Code metrics cache hitrate on every process.
 

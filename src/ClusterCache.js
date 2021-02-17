@@ -164,8 +164,8 @@ var ClusterCache = {
                     ttl = ClusterCache.options.defaultTtl;
                 }
                 pr.getWriteProcess(key, ClusterCache.options.storage).then(processes => {
-                    processes.forEach((p) => {
-                        ClusterCache._setToProc(key, value, ttl, p);
+                    processes.forEach(async (p) => {
+                        await ClusterCache._setToProc(key, value, ttl, p);
                     });
                     return ok({
                         process: processes,
@@ -177,25 +177,28 @@ var ClusterCache = {
         },
 
         _setToProc: function (key, value, ttl, proc) {
-            if (parseInt(proc) === parseInt(process.env.pm_id)) {
-                let data = {
-                    k: key,
-                    v: value,
-                    t: new Date().getTime() + ttl
-                };
-                dr.set(key, data);
-            } else {
-                pm2.sendDataToProcessId(proc, {
-                    data: {
+            return new Promise((ok, fail) => {
+                if (parseInt(proc) === parseInt(process.env.pm_id)) {
+                    let data = {
                         k: key,
                         v: value,
                         t: new Date().getTime() + ttl
-                    },
-                    topic: TOPIC_SET
-                }, function (e) {
-
-                });
-            }
+                    };
+                    dr.set(key, data);
+                    return ok();
+                } else {
+                    pm2.sendDataToProcessId(proc, {
+                        data: {
+                            k: key,
+                            v: value,
+                            t: new Date().getTime() + ttl
+                        },
+                        topic: TOPIC_SET
+                    }, function (e) {
+                        return ok();
+                    });
+                }
+            });
         }
     }
 ;

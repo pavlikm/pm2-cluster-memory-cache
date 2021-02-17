@@ -14,10 +14,8 @@
   "license": "MIT",
   "dependencies": {
     "pm2": "^4.5.4",
-    "shelljs": "^0.8.4",
     "@pm2/io": "^4.3.5",
-    "babel-preset-env": "^1.7.0",
-    "babel-polyfill": "^6.26.0"
+    "babel-preset-env": "^1.7.0"
   },
   "devDependencies": {}
 }

@@ -17,17 +17,13 @@
   "author": "pavlikm",
   "license": "MIT",
   "devDependencies": {
-    "@pm2/io": "^4.3.5",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
-    "@babel/plugin-transform-async-to-generator": "^7.12.13",
+    "@babel/polyfill": "^7.12.1",
     "express": "^4.17.1",
     "frisby": "^2.1.3",
     "ip": "^1.1.5",
     "jasmine": "^3.6.4",
-    "pm2": "^4.5.4"
-  },
-  "dependencies": {
-    "@babel/polyfill": "^7.12.1"
+    "axios": "^0.21.1"
   }
 }

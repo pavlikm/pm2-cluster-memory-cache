@@ -1,4 +1,4 @@
-import {cr, dr} from './repositories';
+import {dr} from './repositories';
 
 var GarbageCollector = {
 
@@ -8,7 +8,6 @@ var GarbageCollector = {
         if (GarbageCollector.timer === undefined) {
             GarbageCollector.timer = setInterval(function () {
                 dr.optimize();
-                cr.optimize();
             }, ms);
         }
     }

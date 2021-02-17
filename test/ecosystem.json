@@ -7,7 +7,7 @@
       "log_file": "log.log",
       "error_file": "error.log",
       "wait_ready": true,
-      "instances": 2,
+      "instances": "max",
       "instance_var": "INSTANCE_ID",
       "exec_mode": "cluster",
       "autorestart": false,
