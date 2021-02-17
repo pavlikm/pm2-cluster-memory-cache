@@ -5,4 +5,5 @@ export const STORAGE_SELF = 'self';
 
 export const TOPIC_SET = 'clusterCache:set';
 export const TOPIC_GET = 'clusterCache:get';
-export const TOPIC_GET_RESPONSE = 'clusterCache:get:response';
+export const TOPIC_DELETE = 'clusterCache:del';
+export const TOPIC_KEYS = 'clusterCache:keys';
