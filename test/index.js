@@ -1,6 +1,5 @@
 require('babel-register')({
-    presets: ['env'],
-    plugins: ['transform-async-to-generator']
+    presets: ['es2015']
 });
 
 require('./app.js');

@@ -2,12 +2,14 @@
   "name": "pm2-cluster-cache",
   "version": "1.0.0",
   "description": "pm2 cluster memory cache with ttl and more possibilities of data store in cluster",
-  "main": "src/ClusterCache.js",
+  "main": "lib/ClusterCache.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:pavlikm/pm2-cluster-memory-cache.git"
   },
   "scripts": {
+    "build": "babel ./src --out-dir ./lib",
+    "prepublish": "npm run build",
     "test": "cd test && npm install && npm run test",
     "test-self": "cd test && npm install && npm run self",
     "test-cluster": "cd test && npm install && npm run cluster",
@@ -18,8 +20,9 @@
   "license": "MIT",
   "dependencies": {
     "pm2": "^4.5.4",
-    "@pm2/io": "^4.3.5",
-    "babel-preset-env": "^1.7.0"
+    "@pm2/io": "^4.3.5"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "babel-preset-es2015": "^6.9.0"
+  }
 }
