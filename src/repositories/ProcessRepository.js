@@ -30,7 +30,7 @@ var ProcessRepository = {
                     var nodes = [];
                     for (var p in processes) {
                         if (processes[p].name === process.env.name) {
-                            nodes.push(processes[p].pm_id);
+                            nodes.push(parseInt(processes[p].pm_id));
                         }
                     }
                     switch (storage) {

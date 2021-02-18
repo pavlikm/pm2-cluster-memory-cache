@@ -1,19 +1,11 @@
 import gc from '../GarbageCollector';
-var io = require('@pm2/io');
 
 var DataRepository = {
 
     data: {},
-    metricKeys: io.metric({
-        name    : 'pm2clusterCache keys'
-    }),
 
     keys: function(){
         return Object.keys(DataRepository.data);
-    },
-
-    sendMetric: function(){
-        DataRepository.metricKeys.set(DataRepository.keys().length);
     },
 
     optimize: function () {
@@ -26,25 +18,22 @@ var DataRepository = {
     },
 
     get: function (key) {
-        DataRepository.sendMetric();
-        return DataRepository.isValid(DataRepository.data[key]) ? DataRepository.data[key] : null;
+        return DataRepository.isValid(DataRepository.data[key]) ? DataRepository.data[key].v : '';
     },
 
     set: function (key, data) {
-        DataRepository.sendMetric();
         DataRepository.data[key] = data;
         gc.start(1000);
     },
 
     delete: function (key) {
         delete DataRepository.data[key];
-        DataRepository.sendMetric();
     },
 
     isValid: function (record) {
         if (record === undefined) return false;
 
-        var isValid = record.t >= new Date().getTime();
+        var isValid = parseInt(record.t) >= parseInt(new Date().getTime());
         if (!isValid) {
             DataRepository.delete(record.k);
         }

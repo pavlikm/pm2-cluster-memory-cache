@@ -2,6 +2,7 @@ const pm2 = require("pm2");
 const crypto = require("crypto");
 import {dr, pr} from './repositories';
 import {STORAGE_CLUSTER, TOPIC_GET, TOPIC_SET, TOPIC_DELETE, TOPIC_KEYS} from "./const";
+var io = require('@pm2/io');
 
 var ClusterCache = {
 
@@ -9,8 +10,21 @@ var ClusterCache = {
             storage: STORAGE_CLUSTER,
             defaultTtl: 1000
         },
+        hit: io.meter({
+            name: 'Cluster Cache hit Rate',
+            samples: 1,
+            timeframe: 1,
+            unit: 'hit/s'
+        }),
+        miss: io.meter({
+            name: 'Cluster Cache miss Rate',
+            samples: 1,
+            timeframe: 1,
+            unit: 'miss/s'
+        }),
 
         init: function (options) {
+            process.setMaxListeners(0);
             Object.assign(ClusterCache.options, options);
             process.on('message', function (packet) {
                 let data = packet.data;
@@ -35,7 +49,8 @@ var ClusterCache = {
                     pm2.sendDataToProcessId(data.respond, {
                         data: dr.get(data.k),
                         topic: data.cb
-                    }, function () {
+                    }, function (e) {
+
                     });
                 }
 
@@ -115,17 +130,40 @@ var ClusterCache = {
         get: function (key, defaultValue) {
             return new Promise((ok, fail) => {
                 pr.getReadProcess(key, ClusterCache.options.storage).then(async processes => {
-                    try {
-                        let randProc = processes[~~(Math.random() * processes.length)];
-                        let value = await ClusterCache._getFromProc(key, randProc);
-                        if (value === null) {
-                            return ok(defaultValue)
+                    let randProc = processes[~~(Math.random() * processes.length)];
+                    ClusterCache._getFromProc(key, randProc).then(value => {
+                        if (value === undefined) {
+                            ClusterCache.miss.mark();
+                            return ok({
+                                data: defaultValue,
+                                metadata: {
+                                    storedOn: [],
+                                    readFrom: parseInt(randProc),
+                                    servedBy: process.env.pm_id
+                                }
+                            })
                         } else {
-                            return ok(value);
+                            ClusterCache.hit.mark();
+                            return ok({
+                                data: value,
+                                metadata: {
+                                    storedOn: processes,
+                                    readFrom: parseInt(randProc),
+                                    servedBy: process.env.pm_id
+                                }
+                            });
                         }
-                    } catch (e) {
-                        return ok(defaultValue);
-                    }
+                    }).catch(e => {
+                        ClusterCache.miss.mark();
+                        return ok({
+                            data: defaultValue,
+                            metadata: {
+                                storedOn: [],
+                                readFrom: parseInt(randProc),
+                                servedBy: process.env.pm_id
+                            }
+                        });
+                    });
                 });
             });
 
@@ -133,25 +171,25 @@ var ClusterCache = {
 
         _getFromProc: function (key, proc) {
             return new Promise((ok, fail) => {
+
                 if (parseInt(process.env.pm_id) === parseInt(proc)) {
                     let data = dr.get(key);
-                    if (data !== null) {
-                        return ok(data.v);
-                    } else {
-                        return fail();
-                    }
+                    return (data !== '') ? ok(data) : fail();
                 }
                 let topic = ClusterCache.generateRespondTopic();
+
                 pm2.sendDataToProcessId(proc, {
                     data: {
                         respond: process.env.pm_id,
-                        cb: topic
+                        cb: topic,
+                        k: key
                     },
                     topic: TOPIC_GET
-                }, function () {
+                }, function (err) {
+                    if(err) fail();
                     process.on('message', function (packet) {
                         if (packet.topic === topic) {
-                            return (packet.data !== null) ? ok(packet.data) : fail();
+                            return (packet.data !== '') ? ok(packet.data) : fail();
                         }
                     });
                 });
@@ -168,8 +206,9 @@ var ClusterCache = {
                         await ClusterCache._setToProc(key, value, ttl, p);
                     });
                     return ok({
-                        process: processes,
-                        ttl: ttl
+                        storedOn: processes,
+                        readFrom: -1,
+                        servedBy: process.env.pm_id
                     });
                 });
             });
@@ -182,7 +221,7 @@ var ClusterCache = {
                     let data = {
                         k: key,
                         v: value,
-                        t: new Date().getTime() + ttl
+                        t: new Date().getTime() + parseInt(ttl)
                     };
                     dr.set(key, data);
                     return ok();
@@ -191,7 +230,7 @@ var ClusterCache = {
                         data: {
                             k: key,
                             v: value,
-                            t: new Date().getTime() + ttl
+                            t: new Date().getTime() + parseInt(ttl)
                         },
                         topic: TOPIC_SET
                     }, function (e) {
