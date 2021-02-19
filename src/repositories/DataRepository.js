@@ -4,7 +4,7 @@ var DataRepository = {
 
     data: {},
 
-    keys: function(){
+    keys: function () {
         return Object.keys(DataRepository.data);
     },
 

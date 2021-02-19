@@ -1,12 +1,13 @@
 {
   "name": "pm2-cluster-cache",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "pm2 cluster memory cache with ttl and more possibilities of data store in cluster",
   "main": "lib/ClusterCache.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:pavlikm/pm2-cluster-memory-cache.git"
   },
+  "keywords": ["pm2", "cache", "cluster", "ttl"],
   "scripts": {
     "build": "babel ./src --out-dir ./lib",
     "prepublish": "npm run build",

@@ -1,7 +1,9 @@
 const pm2 = require("pm2");
 const crypto = require("crypto");
+import metadata from './metadata';
 import {dr, pr} from './repositories';
 import {STORAGE_CLUSTER, TOPIC_GET, TOPIC_SET, TOPIC_DELETE, TOPIC_KEYS} from "./const";
+
 var io = require('@pm2/io');
 
 var ClusterCache = {
@@ -71,7 +73,7 @@ var ClusterCache = {
                     },
                     topic: TOPIC_KEYS
                 }, function () {
-                    process.on('message', function (packet) {
+                    process.prependOnceListener('message', function (packet) {
                         if (packet.topic === topic) {
                             return ok(packet.data);
                         }
@@ -81,7 +83,7 @@ var ClusterCache = {
         },
 
         generateRespondTopic: function () {
-            return 'clusterCache#' + crypto.randomBytes(16).toString("hex");
+            return 'clusterCache' + crypto.randomBytes(16).toString("hex");
         },
 
         keys: function () {
@@ -129,6 +131,9 @@ var ClusterCache = {
 
         get: function (key, defaultValue) {
             return new Promise((ok, fail) => {
+                if (typeof key !== "string") {
+                    return fail('non string value passed to key');
+                }
                 pr.getReadProcess(key, ClusterCache.options.storage).then(async processes => {
                     let randProc = processes[~~(Math.random() * processes.length)];
                     ClusterCache._getFromProc(key, randProc).then(value => {
@@ -136,32 +141,20 @@ var ClusterCache = {
                             ClusterCache.miss.mark();
                             return ok({
                                 data: defaultValue,
-                                metadata: {
-                                    storedOn: [],
-                                    readFrom: parseInt(randProc),
-                                    servedBy: process.env.pm_id
-                                }
+                                metadata: metadata([], randProc)
                             })
                         } else {
                             ClusterCache.hit.mark();
                             return ok({
                                 data: value,
-                                metadata: {
-                                    storedOn: processes,
-                                    readFrom: parseInt(randProc),
-                                    servedBy: process.env.pm_id
-                                }
+                                metadata: metadata(processes, randProc)
                             });
                         }
                     }).catch(e => {
                         ClusterCache.miss.mark();
                         return ok({
                             data: defaultValue,
-                            metadata: {
-                                storedOn: [],
-                                readFrom: parseInt(randProc),
-                                servedBy: process.env.pm_id
-                            }
+                            metadata: metadata([], randProc)
                         });
                     });
                 });
@@ -186,8 +179,8 @@ var ClusterCache = {
                     },
                     topic: TOPIC_GET
                 }, function (err) {
-                    if(err) fail();
-                    process.on('message', function (packet) {
+                    if (err) fail();
+                    process.prependOnceListener('message', function (packet) {
                         if (packet.topic === topic) {
                             return (packet.data !== '') ? ok(packet.data) : fail();
                         }
@@ -198,6 +191,9 @@ var ClusterCache = {
 
         set: function (key, value, ttl) {
             return new Promise((ok, fail) => {
+                if (typeof key !== "string") {
+                    return fail('non string value passed to key');
+                }
                 if (ttl === undefined) {
                     ttl = ClusterCache.options.defaultTtl;
                 }
@@ -205,11 +201,7 @@ var ClusterCache = {
                     processes.forEach(async (p) => {
                         await ClusterCache._setToProc(key, value, ttl, p);
                     });
-                    return ok({
-                        storedOn: processes,
-                        readFrom: -1,
-                        servedBy: process.env.pm_id
-                    });
+                    return ok(metadata(processes));
                 });
             });
 

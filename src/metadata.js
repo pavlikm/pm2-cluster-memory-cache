@@ -1,6 +1,8 @@
-var Metadata = function (proc) {
+var Metadata = function (candidates, final) {
     return {
-        'source': proc
+        storedOn: candidates,
+        readFrom: parseInt(final) || -1,
+        servedBy: parseInt(process.env.pm_id)
     }
 };
 
