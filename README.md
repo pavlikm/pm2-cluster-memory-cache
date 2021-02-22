@@ -15,8 +15,8 @@ npm run test
 
 ### Usage
 ```javascript
-const ClusterCache = require('pm2-cluster-cache');
-let cache = ClusterCache.init({storage: "cluster"});
+const pm2ClusterCache = require('pm2-cluster-cache');
+let cache = pm2ClusterCache.init({storage: "cluster"});
 
 //set value to cache for 1s
 cache.set('key', 'data', 1000).then(metadata => {
@@ -48,6 +48,7 @@ cache.keys().then(map => {
 - `get(key, [defaultValue])` get value stored under key 'key'. In Promise returns object with obtained value, and `metadata`.
 - `delete(key)` removes key from all process where is given key stored. Returns in Promise array of processes deleted from.
 - `keys()` returns in Promise map of cluster with numbers of stored keys.
+
 
 `metadata` object for methods `get` and `set` is object with keys:
 - `storedOn` - array of int. Processes that have key stored.
