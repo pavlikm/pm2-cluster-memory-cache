@@ -5,6 +5,7 @@ var DataRepository = {
     data: {},
 
     keys: function () {
+        DataRepository.optimize();
         return Object.keys(DataRepository.data);
     },
 
