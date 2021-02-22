@@ -20,7 +20,7 @@ beforeEach(function (done) {
 describe('/storage type master', () => {
 
     it('should be able to read value', (done) => {
-        axios.get(BASE_URL + "/set?key=foo&value=bar&ttl=500").then(res => {
+        axios.get(BASE_URL + "/set?key=foo&value=bar&ttl=50").then(res => {
             return frisby
                 .get(BASE_URL + "/get?key=foo")
                 .expect('status', 200)

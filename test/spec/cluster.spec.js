@@ -21,7 +21,7 @@ beforeEach(function (done) {
 describe('/storage type cluster', () => {
 
     it('should be able to read value', (done) => {
-        axios.get(BASE_URL + "/set?key=test&value=bar&ttl=500").then(res => {
+        axios.get(BASE_URL + "/set?key=test&value=bar&ttl=50").then(res => {
             return frisby
                 .get(BASE_URL + "/get?key=test")
                 .expect('status', 200)
