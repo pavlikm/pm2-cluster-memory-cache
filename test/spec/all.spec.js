@@ -15,7 +15,9 @@ afterAll((done) => {
 });
 
 beforeEach(function (done) {
-    setTimeout(done, 50);
+    axios.get(BASE_URL + "/flush").then(function () {
+        done();
+    })
 });
 
 describe('/storage type all', () => {

@@ -31,6 +31,10 @@ var DataRepository = {
         delete DataRepository.data[key];
     },
 
+    flush: function () {
+        DataRepository.data = {};
+    },
+
     isValid: function (record) {
         if (record === undefined) return false;
 
@@ -46,6 +50,7 @@ module.exports = {
     get: DataRepository.get,
     set: DataRepository.set,
     delete: DataRepository.delete,
+    flush: DataRepository.flush,
     optimize: DataRepository.optimize,
     keys: DataRepository.keys
 };

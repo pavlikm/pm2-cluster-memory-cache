@@ -30,6 +30,12 @@ app.get("/delete", (req, res) => {
     });
 });
 
+app.get("/flush", (req, res) => {
+    cache.flush().then(() => {
+        res.send("ok");
+    });
+});
+
 app.get("/info", (req, res) => {
     cache.keys().then(data => {
         res.send(data);

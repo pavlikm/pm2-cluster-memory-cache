@@ -38,7 +38,7 @@ cache.keys().then(map => {
 ### API
 
 - `init(options)` - create new cluster cache. Options object can have following keys:
-  - `defaultTtl` - default time to live for keys in ms. Default value is `1000`
+  - `defaultTtl` - default time to live for keys in ms. Default value is `1000`ms.
   - `storage` - can be one of `self`, `all`, `master`, `cluster`. Default value is `cluster`. 
     - `self` - store to actual process, read from actual process. Every process has his own cache, so this cache is not shared between processes.
     - `all` - store to all processes, read from actual process. Data are duplicated and on every process is stored full replica of all data. If one process restarts, other process are not affected with cache misses.
@@ -47,13 +47,9 @@ cache.keys().then(map => {
 - `set(key, value, [ttl])` store value under key, with given ttl (in ms). Returns Promise with `metadata`.
 - `get(key, [defaultValue])` get value stored under key 'key'. In Promise returns object with obtained value, and `metadata`.
 - `delete(key)` removes key from all process where is given key stored. Returns in Promise array of processes deleted from.
+- `flush()` removes all keys from all processes.
 - `keys()` returns in Promise map of cluster with numbers of stored keys.
 
-
-`metadata` object for methods `get` and `set` is object with keys:
-- `storedOn` - array of int. Processes that have key stored.
-- `readFrom` - int. Proccess which provided data
-- `servedBy` - int. Actual process. 
 
 ### PM2 metrics
 with command `pm2 describe <your app name>` you can see in Code metrics cache hit rate and miss rate on every process.
