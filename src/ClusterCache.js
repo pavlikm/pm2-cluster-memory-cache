@@ -2,7 +2,7 @@ const pm2 = require("pm2");
 const crypto = require("crypto");
 import metadata from './metadata';
 import {dr, pr} from './repositories';
-import {STORAGE_CLUSTER, TOPIC_GET, TOPIC_SET, TOPIC_DELETE, TOPIC_KEYS} from "./const";
+import {STORAGE_CLUSTER, TOPIC_GET, TOPIC_SET, TOPIC_DELETE, TOPIC_KEYS, TOPIC_FLUSH} from "./const";
 
 var io = require('@pm2/io');
 
@@ -37,6 +37,10 @@ var ClusterCache = {
 
                 if (packet.topic === TOPIC_DELETE) {
                     dr.delete(data.k);
+                }
+
+                if (packet.topic === TOPIC_FLUSH) {
+                    dr.flush();
                 }
 
                 if (packet.topic === TOPIC_KEYS) {
@@ -100,6 +104,22 @@ var ClusterCache = {
                         return ok(map);
                     });
                 });
+            });
+        },
+
+        flush: function () {
+            return new Promise(async (ok, fail) => {
+                let processes = await pr.getAll();
+                processes.forEach(p => {
+
+                    pm2.sendDataToProcessId(p, {
+                        data: {},
+                        topic: TOPIC_FLUSH
+                    }, function (e) {
+                        return fail();
+                    });
+                });
+                return ok();
             });
         },
 
@@ -197,6 +217,7 @@ var ClusterCache = {
                 if (ttl === undefined) {
                     ttl = ClusterCache.options.defaultTtl;
                 }
+
                 pr.getWriteProcess(key, ClusterCache.options.storage).then(processes => {
                     processes.forEach(async (p) => {
                         await ClusterCache._setToProc(key, value, ttl, p);
@@ -239,5 +260,6 @@ module.exports = {
     set: ClusterCache.set,
     delete: ClusterCache.delete,
     keys: ClusterCache.keys,
+    flush: ClusterCache.flush,
     init: ClusterCache.init
 };

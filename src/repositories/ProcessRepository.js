@@ -28,7 +28,7 @@ var ProcessRepository = {
 
     findProcesses: function () {
         return new Promise(function (ok, fail) {
-            pm2.connect(function () {
+            pm2.connect(function (err) {
                 pm2.list(function (err, proc) {
                     if (err) {
                         return ok([]);
@@ -87,4 +87,5 @@ var ProcessRepository = {
 module.exports = {
     getReadProcess: ProcessRepository.getReadProcess,
     getWriteProcess: ProcessRepository.getWriteProcess,
+    getAll: ProcessRepository.findProcesses
 };
