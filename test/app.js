@@ -5,7 +5,8 @@ const app = express();
 const server = http.createServer(app);
 import ClusterCache from '../src/ClusterCache';
 
-let cache = ClusterCache.init({storage: process.env.npm_lifecycle_event || "master"});
+let type = "cluster";
+let cache = ClusterCache.init({storage: process.env.npm_lifecycle_event || type});
 
 app.get("/set", (req, res) => {
     let key = req.query.key;

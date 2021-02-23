@@ -6,23 +6,36 @@ var ProcessRepository = {
 
     processes: [],
 
+    init: function () {
+        if (ProcessRepository.processes.length === 0) {
+            return ProcessRepository.findProcesses();
+        } else return new Promise(ok => {
+            ok(ProcessRepository.processes);
+        });
+    },
+
     getReadProcess: function (key, storage) {
-        return new Promise(function (ok, fail) {
-            key = key + '';
-            if (storage === STORAGE_SELF || storage === STORAGE_ALL) {
-                return ok([process.env.pm_id]);
-            }
-            return ok(ProcessRepository.findInCluster(key, storage));
+        return ProcessRepository.init().then(nodes => {
+            return new Promise(function (ok, fail) {
+                key = key + '';
+                if (storage === STORAGE_SELF || storage === STORAGE_ALL) {
+                    return ok([process.env.pm_id]);
+                }
+                return ok(ProcessRepository.findInCluster(key, storage, nodes));
+            })
         })
+
     },
 
     getWriteProcess: function (key, storage) {
-        return new Promise(function (ok, fail) {
-            key = key + '';
-            if (storage === STORAGE_SELF) {
-                return ok([process.env.pm_id]);
-            }
-            return ok(ProcessRepository.findInCluster(key, storage));
+        return ProcessRepository.init().then(nodes => {
+            return new Promise(function (ok, fail) {
+                key = key + '';
+                if (storage === STORAGE_SELF) {
+                    return ok([process.env.pm_id]);
+                }
+                return ok(ProcessRepository.findInCluster(key, storage, nodes));
+            })
         })
     },
 
@@ -39,20 +52,17 @@ var ProcessRepository = {
                             nodes.push(parseInt(proc[p].pm_id));
                         }
                     }
+                    if(nodes.length > 0){
+                        ProcessRepository.processes = nodes;
+                    }
                     return ok(nodes);
                 });
             });
         });
     },
 
-    findInCluster: function (key, storage) {
+    findInCluster: function (key, storage, nodes) {
         return new Promise(async function (ok, fail) {
-            var nodes = [];
-            if (ProcessRepository.processes.length === 0) {
-                ProcessRepository.processes = await ProcessRepository.findProcesses();
-            }
-            nodes = ProcessRepository.processes;
-
             switch (storage) {
                 case STORAGE_ALL: {
                     return ok([...nodes]);
@@ -87,5 +97,6 @@ var ProcessRepository = {
 module.exports = {
     getReadProcess: ProcessRepository.getReadProcess,
     getWriteProcess: ProcessRepository.getWriteProcess,
-    getAll: ProcessRepository.findProcesses
+    getAll: ProcessRepository.findProcesses,
+    init: ProcessRepository.init
 };

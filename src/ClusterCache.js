@@ -26,6 +26,7 @@ var ClusterCache = {
         }),
 
         init: function (options) {
+            pr.init();
             process.setMaxListeners(0);
             Object.assign(ClusterCache.options, options);
             process.on('message', function (packet) {
