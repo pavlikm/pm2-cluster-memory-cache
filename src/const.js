@@ -7,3 +7,4 @@ export const TOPIC_SET = 'clusterCache:set';
 export const TOPIC_GET = 'clusterCache:get';
 export const TOPIC_DELETE = 'clusterCache:del';
 export const TOPIC_KEYS = 'clusterCache:keys';
+export const TOPIC_FLUSH = 'clusterCache:flush';

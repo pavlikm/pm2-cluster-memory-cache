@@ -1,7 +1,6 @@
-const frisby = require('frisby');
 const ip = require("ip");
 var pm2 = require('pm2');
-const http = require('http');
+const axios = require('axios');
 
 var BASE_URL = "http://" + ip.address() + ":8080";
 
@@ -14,7 +13,9 @@ afterAll((done) => {
 });
 
 beforeEach(function (done) {
-    setTimeout(done, 50);
+    axios.get(BASE_URL + "/flush").then(function () {
+        done();
+    })
 });
 
 describe('/storage type self', () => {

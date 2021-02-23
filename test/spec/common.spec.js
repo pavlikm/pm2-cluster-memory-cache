@@ -79,6 +79,25 @@ describe('/every storage type', () => {
             })
     });
 
+    it('should flush all keys', (done) => {
+        let homer = axios.get(BASE_URL + "/set?key=homer&value=simpson&ttl=10000");
+        let meggie = axios.get(BASE_URL + "/set?key=meggie&value=simpson&ttl=10000");
+        let bart = axios.get(BASE_URL + "/set?key=bart&value=simpson&ttl=10000");
+        let flush = axios.get(BASE_URL + "/flush");
+        axios.all([homer, meggie, bart, flush]).then(resp => {
+            return frisby
+                .get(BASE_URL + "/info")
+                .then(function (res) {
+                    for (const [key, value] of Object.entries(res._json)) {
+                        if (value.length !== 0) {
+                            fail(); //all keys must be removed
+                        }
+                    }
+                    done();
+                });
+        });
+    });
+
 });
 
 
