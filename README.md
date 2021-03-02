@@ -1,5 +1,6 @@
 # pm2 cluster memory cache
-A cluster cache object for pm2 with some different possibilities of data store.
+A cluster memory cache for pm2 with some different possibilities of data store. 
+From version 1.0.5 is safe to use without pm2 too, but storage type will be forced to 'self'.
 
 ### Instalation
 ```javascript
@@ -39,6 +40,7 @@ cache.keys().then(map => {
 
 - `init(options)` - create new cluster cache. Options object can have following keys:
   - `defaultTtl` - default time to live for keys in ms. Default value is `1000`ms.
+  - `logger` - default console. May be any class with impemented methods `log` and `warn`.
   - `storage` - can be one of `self`, `all`, `master`, `cluster`. Default value is `cluster`. 
     - `self` - store to actual process, read from actual process. Every process has his own cache, so this cache is not shared between processes.
     - `all` - store to all processes, read from actual process. Data are duplicated and on every process is stored full replica of all data. If one process restarts, other process are not affected with cache misses.

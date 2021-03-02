@@ -2,7 +2,7 @@ const pm2 = require("pm2");
 const crypto = require("crypto");
 import metadata from './metadata';
 import {dr, pr} from './repositories';
-import {STORAGE_CLUSTER, TOPIC_GET, TOPIC_SET, TOPIC_DELETE, TOPIC_KEYS, TOPIC_FLUSH} from "./const";
+import {STORAGE_CLUSTER, STORAGE_SELF, TOPIC_GET, TOPIC_SET, TOPIC_DELETE, TOPIC_KEYS, TOPIC_FLUSH} from "./const";
 
 var io = require('@pm2/io');
 
@@ -10,7 +10,8 @@ var ClusterCache = {
 
         options: {
             storage: STORAGE_CLUSTER,
-            defaultTtl: 1000
+            defaultTtl: 1000,
+            logger: console
         },
         hit: io.meter({
             name: 'Cluster Cache hit Rate',
@@ -26,9 +27,15 @@ var ClusterCache = {
         }),
 
         init: function (options) {
+            Object.assign(ClusterCache.options, options);
+            if(process.env.pm_id === undefined){
+                process.env.pm_id = -1;
+                ClusterCache.options.storage = STORAGE_SELF;
+                ClusterCache.options.logger.warn(`not running on pm2 - storage forced to '${STORAGE_SELF}'`);
+            }
             pr.init();
             process.setMaxListeners(0);
-            Object.assign(ClusterCache.options, options);
+
             process.on('message', function (packet) {
                 let data = packet.data;
 

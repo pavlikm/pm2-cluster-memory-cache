@@ -1,10 +1,11 @@
 import {STORAGE_ALL, STORAGE_CLUSTER, STORAGE_MASTER, STORAGE_SELF} from "../const";
+import metadata from "../metadata";
 
 const pm2 = require("pm2");
 
 var ProcessRepository = {
 
-    processes: [],
+    processes: process.env.pm_id < 0 ? [-1] : [],
 
     init: function () {
         if (ProcessRepository.processes.length === 0) {
@@ -18,7 +19,7 @@ var ProcessRepository = {
         return ProcessRepository.init().then(nodes => {
             return new Promise(function (ok, fail) {
                 key = key + '';
-                if (storage === STORAGE_SELF || storage === STORAGE_ALL) {
+                if (storage.toLowerCase() === STORAGE_SELF || storage.toLowerCase() === STORAGE_ALL) {
                     return ok([process.env.pm_id]);
                 }
                 return ok(ProcessRepository.findInCluster(key, storage, nodes));
@@ -31,7 +32,7 @@ var ProcessRepository = {
         return ProcessRepository.init().then(nodes => {
             return new Promise(function (ok, fail) {
                 key = key + '';
-                if (storage === STORAGE_SELF) {
+                if (storage.toLowerCase() === STORAGE_SELF) {
                     return ok([process.env.pm_id]);
                 }
                 return ok(ProcessRepository.findInCluster(key, storage, nodes));
@@ -63,7 +64,7 @@ var ProcessRepository = {
 
     findInCluster: function (key, storage, nodes) {
         return new Promise(async function (ok, fail) {
-            switch (storage) {
+            switch (storage.toLowerCase()) {
                 case STORAGE_ALL: {
                     return ok([...nodes]);
                 }
