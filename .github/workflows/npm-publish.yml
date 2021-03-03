@@ -30,10 +30,7 @@ jobs:
       - run: npm ci
       - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-
-  publish-gpr:
-    needs: build
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
