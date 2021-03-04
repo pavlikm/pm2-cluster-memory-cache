@@ -2,12 +2,13 @@ const pm2 = require("pm2");
 const crypto = require("crypto");
 import metadata from './metadata';
 import {dr, pr} from './repositories';
-import {STORAGE_CLUSTER, STORAGE_SELF, TOPIC_GET, TOPIC_SET, TOPIC_DELETE, TOPIC_KEYS, TOPIC_FLUSH} from "./const";
+import {STORAGE_CLUSTER, STORAGE_SELF, STORAGE_ALL, STORAGE_MASTER, TOPIC_GET, TOPIC_SET, TOPIC_DELETE, TOPIC_KEYS, TOPIC_FLUSH} from "./const";
 
 var io = require('@pm2/io');
 
 var ClusterCache = {
 
+        initialized: false,
         options: {
             storage: STORAGE_CLUSTER,
             defaultTtl: 1000,
@@ -27,14 +28,32 @@ var ClusterCache = {
         }),
 
         init: function (options) {
+            if(ClusterCache.initialized){
+                if(options.storage && ClusterCache.options.storage !== options.storage){
+                    ClusterCache.options.logger.warn(`pm2-cluster-cache already initialized - storage changed to previous init value - '${ClusterCache.options.storage}'`);
+                }
+                if(options.defaultTtl && ClusterCache.options.defaultTtl !== options.defaultTtl){
+                    ClusterCache.options.logger.warn(`pm2-cluster-cache already initialized - defaultTtl changed to previous init value - '${ClusterCache.options.defaultTtl}'`);
+                }
+                return this;
+            }
+            if(options.defaultTtl && (typeof options.defaultTtl !== "number" || options.defaultTtl <= 0)){
+                ClusterCache.options.logger.warn(`invalid value defaultTtl, will use default value: ${ClusterCache.options.defaultTtl}`);
+                delete options.defaultTtl;
+            }
+            if(options.storage && [STORAGE_CLUSTER, STORAGE_SELF, STORAGE_ALL, STORAGE_MASTER].includes(options.storage) === false){
+                ClusterCache.options.logger.warn(`invalid value storage, will use default value: ${ClusterCache.options.storage}`);
+                delete options.storage;
+            }
             Object.assign(ClusterCache.options, options);
             if(process.env.pm_id === undefined){
                 process.env.pm_id = -1;
                 ClusterCache.options.storage = STORAGE_SELF;
-                ClusterCache.options.logger.warn(`not running on pm2 - storage forced to '${STORAGE_SELF}'`);
+                ClusterCache.options.logger.warn(`not running on pm2 - pm2-cluster-cache storage forced to '${STORAGE_SELF}'`);
+            } else {
+                pr.init();
+                process.setMaxListeners(0);
             }
-            pr.init();
-            process.setMaxListeners(0);
 
             process.on('message', function (packet) {
                 let data = packet.data;
@@ -69,6 +88,7 @@ var ClusterCache = {
                 }
 
             });
+            ClusterCache.initialized = true;
             return this;
         },
 
@@ -166,20 +186,20 @@ var ClusterCache = {
                     let randProc = processes[~~(Math.random() * processes.length)];
                     ClusterCache._getFromProc(key, randProc).then(value => {
                         if (value === undefined) {
-                            ClusterCache.miss.mark();
+                            if(process.env.pm_id >= 0) ClusterCache.miss.mark();
                             return ok({
                                 data: defaultValue,
                                 metadata: metadata([], randProc)
                             })
                         } else {
-                            ClusterCache.hit.mark();
+                            if(process.env.pm_id >= 0) ClusterCache.hit.mark();
                             return ok({
                                 data: value,
                                 metadata: metadata(processes, randProc)
                             });
                         }
                     }).catch(e => {
-                        ClusterCache.miss.mark();
+                        if(process.env.pm_id >= 0) ClusterCache.miss.mark();
                         return ok({
                             data: defaultValue,
                             metadata: metadata([], randProc)
