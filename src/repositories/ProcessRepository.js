@@ -8,7 +8,7 @@ var ProcessRepository = {
     processes: process.env.pm_id < 0 ? [-1] : [],
 
     init: function () {
-        if (ProcessRepository.processes.length === 0) {
+        if (process.env.pm_id >= 0 && ProcessRepository.processes.length === 0) {
             return ProcessRepository.findProcesses();
         } else return new Promise(ok => {
             ok(ProcessRepository.processes);
