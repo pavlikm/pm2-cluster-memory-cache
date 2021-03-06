@@ -4,11 +4,6 @@ const axios = require('axios');
 
 var BASE_URL = "http://" + ip.address() + ":8080";
 
-
-beforeEach(function (done) {
-    setTimeout(done, 100);
-});
-
 describe('/every storage type', () => {
     it('should be able to set value', (done) => {
         return frisby
