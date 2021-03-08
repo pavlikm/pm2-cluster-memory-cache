@@ -1,6 +1,6 @@
 {
   "name": "pm2-cluster-cache",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "pm2 cluster memory cache with ttl and more possibilities of data store in cluster",
   "main": "lib/ClusterCache.js",
   "repository": {
@@ -12,9 +12,11 @@
   },
   "keywords": [
     "pm2",
+    "memory",
     "cache",
     "cluster",
-    "ttl"
+    "ttl",
+    "key-value"
   ],
   "scripts": {
     "build": "babel ./src --out-dir ./lib",

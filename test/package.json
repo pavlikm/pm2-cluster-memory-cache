@@ -11,8 +11,9 @@
     "self": "node server.js && jasmine JASMINE_CONFIG_PATH=spec/self.json",
     "cluster": "node server.js cluster && jasmine JASMINE_CONFIG_PATH=spec/cluster.json",
     "all": "node server.js all && jasmine JASMINE_CONFIG_PATH=spec/all.json",
+    "all2": "jasmine JASMINE_CONFIG_PATH=spec/all.json",
     "master": "node server.js master && jasmine JASMINE_CONFIG_PATH=spec/master.json",
-    "test": "npm run self && npm run all && npm run master && npm run cluster"
+    "test": "npm run cluster && npm run all && npm run master && npm run self"
   },
   "author": "pavlikm",
   "license": "MIT",
