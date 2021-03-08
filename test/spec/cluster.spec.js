@@ -1,18 +1,9 @@
 const frisby = require('frisby');
+const Joi = frisby.Joi;
 const ip = require("ip");
-var pm2 = require('pm2');
 const axios = require('axios');
 
 var BASE_URL = "http://" + ip.address() + ":8080";
-
-
-afterAll((done) => {
-    pm2.connect(function (err) {
-        pm2.delete('pm2cluster', (err, proc) => {
-            done();
-        });
-    });
-});
 
 beforeEach(function (done) {
     axios.get(BASE_URL + "/flush").then(function () {
@@ -23,7 +14,7 @@ beforeEach(function (done) {
 describe('/storage type cluster', () => {
 
     it('should be able to read value', (done) => {
-        axios.get(BASE_URL + "/set?key=test&value=bar&ttl=50").then(res => {
+        axios.get(BASE_URL + "/set?key=test&value=bar&ttl=10000").then(res => {
             return frisby
                 .get(BASE_URL + "/get?key=test")
                 .expect('status', 200)
@@ -31,6 +22,51 @@ describe('/storage type cluster', () => {
                 .expect('json', 'value', "bar")
                 .done(done);
         });
+    });
+
+    it('should return metadata on get', (done) => {
+        axios.get(BASE_URL + "/set?key=homer&value=simpson&ttl=10000").then(() => {
+            return frisby
+                .get(BASE_URL + "/get?key=homer")
+                .expect('status', 200)
+                .expect('json', 'key', 'homer')
+                .expect('json', 'value', 'simpson')
+                .expect('jsonTypes', 'metadata', Joi.object())
+                .done(done);
+        });
+    });
+
+    it('should return only value on read', (done) => {
+        axios.get(BASE_URL + "/set?key=homer&value=simpson&ttl=10000").then(() => {
+            return frisby
+                .get(BASE_URL + "/read?key=homer")
+                .expect('status', 200)
+                .expect('json', 'key', 'homer')
+                .expect('json', 'value', 'simpson')
+                .done(done);
+        });
+    });
+
+    it('should delete value from all stored processes', (done) => {
+        return frisby
+            .get(BASE_URL + "/set?key=foo&value=bar&ttl=10000")
+            .expect('status', 200)
+            .expect('json', 'key', 'foo')
+            .then(res => {
+                axios.get(BASE_URL + '/delete?key=foo').then(res => {
+                    return frisby
+                        .get(BASE_URL + "/info")
+                        .expect('status', 200)
+                        .then(res => {
+                            for (const [key, value] of Object.entries(res._json)) {
+                                if (value.indexOf("foo") !== -1) {
+                                    fail();
+                                }
+                            }
+                            done();
+                        })
+                })
+            })
     });
 
     it('should store keys on different processes', (done) => {

@@ -93,7 +93,6 @@ var ClusterCache = {
                         data: dr.get(data.k),
                         topic: data.cb
                     }, function (e) {
-
                     });
                 }
 
@@ -114,7 +113,8 @@ var ClusterCache = {
                         cb: topic
                     },
                     topic: TOPIC_KEYS
-                }, function () {
+                }, function (e) {
+                    if (e) return fail();
                     process.prependOnceListener('message', function (packet) {
                         if (packet.topic === topic) {
                             return ok(packet.data);
@@ -154,7 +154,7 @@ var ClusterCache = {
                         data: {},
                         topic: TOPIC_FLUSH
                     }, function (e) {
-                        return fail();
+                        if (e) return fail();
                     });
                 });
                 return ok();

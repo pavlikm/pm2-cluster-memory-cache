@@ -2,37 +2,37 @@ import gc from '../GarbageCollector';
 
 var DataRepository = {
 
-    data: {},
+    data: new Map(),
 
     keys: function () {
         DataRepository.optimize();
-        return Object.keys(DataRepository.data);
+        return [ ...DataRepository.data.keys() ];
     },
 
     optimize: function () {
-        for (const [key, record] of Object.entries(DataRepository.data)) {
+        DataRepository.data.forEach((record, key) => {
             if (!DataRepository.isValid(record)) {
                 DataRepository.delete(key);
             }
-        }
-
+        });
     },
 
     get: function (key) {
-        return DataRepository.isValid(DataRepository.data[key]) ? DataRepository.data[key].v : '';
+        return DataRepository.isValid(DataRepository.data.get(key)) ? DataRepository.data.get(key).v : '';
     },
 
     set: function (key, data) {
-        DataRepository.data[key] = data;
+        DataRepository.data.delete(key);
+        DataRepository.data.set(key, data);
         gc.start(1000);
     },
 
     delete: function (key) {
-        delete DataRepository.data[key];
+        DataRepository.data.delete(key);
     },
 
     flush: function () {
-        DataRepository.data = {};
+        DataRepository.data.clear();
     },
 
     isValid: function (record) {
