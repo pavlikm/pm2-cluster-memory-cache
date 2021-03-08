@@ -2,7 +2,17 @@ const pm2 = require("pm2");
 const crypto = require("crypto");
 import metadata from './metadata';
 import {dr, pr} from './repositories';
-import {STORAGE_CLUSTER, STORAGE_SELF, STORAGE_ALL, STORAGE_MASTER, TOPIC_GET, TOPIC_SET, TOPIC_DELETE, TOPIC_KEYS, TOPIC_FLUSH} from "./const";
+import {
+    STORAGE_CLUSTER,
+    STORAGE_SELF,
+    STORAGE_ALL,
+    STORAGE_MASTER,
+    TOPIC_GET,
+    TOPIC_SET,
+    TOPIC_DELETE,
+    TOPIC_KEYS,
+    TOPIC_FLUSH
+} from "./const";
 
 var io = require('@pm2/io');
 
@@ -28,25 +38,25 @@ var ClusterCache = {
         }),
 
         init: function (options) {
-            if(ClusterCache.initialized){
-                if(options.storage && ClusterCache.options.storage !== options.storage){
+            if (ClusterCache.initialized) {
+                if (options.storage && ClusterCache.options.storage !== options.storage) {
                     ClusterCache.options.logger.warn(`pm2-cluster-cache already initialized - storage changed to previous init value - '${ClusterCache.options.storage}'`);
                 }
-                if(options.defaultTtl && ClusterCache.options.defaultTtl !== options.defaultTtl){
+                if (options.defaultTtl && ClusterCache.options.defaultTtl !== options.defaultTtl) {
                     ClusterCache.options.logger.warn(`pm2-cluster-cache already initialized - defaultTtl changed to previous init value - '${ClusterCache.options.defaultTtl}'`);
                 }
                 return this;
             }
-            if(options.defaultTtl && (typeof options.defaultTtl !== "number" || options.defaultTtl <= 0)){
+            if (options.defaultTtl && (typeof options.defaultTtl !== "number" || options.defaultTtl <= 0)) {
                 ClusterCache.options.logger.warn(`invalid value defaultTtl, will use default value: ${ClusterCache.options.defaultTtl}`);
                 delete options.defaultTtl;
             }
-            if(options.storage && [STORAGE_CLUSTER, STORAGE_SELF, STORAGE_ALL, STORAGE_MASTER].includes(options.storage) === false){
+            if (options.storage && [STORAGE_CLUSTER, STORAGE_SELF, STORAGE_ALL, STORAGE_MASTER].includes(options.storage) === false) {
                 ClusterCache.options.logger.warn(`invalid value storage, will use default value: ${ClusterCache.options.storage}`);
                 delete options.storage;
             }
             Object.assign(ClusterCache.options, options);
-            if(process.env.pm_id === undefined){
+            if (process.env.pm_id === undefined) {
                 process.env.pm_id = -1;
                 ClusterCache.options.storage = STORAGE_SELF;
                 ClusterCache.options.logger.warn(`not running on pm2 - pm2-cluster-cache storage forced to '${STORAGE_SELF}'`);
@@ -177,6 +187,16 @@ var ClusterCache = {
             }
         },
 
+        read: async function (key, defaultValue) {
+            try {
+                let value = await ClusterCache.get(key, defaultValue);
+                return value.data;
+            } catch (e) {
+                return defaultValue;
+            }
+
+        },
+
         get: function (key, defaultValue) {
             return new Promise((ok, fail) => {
                 if (typeof key !== "string") {
@@ -186,20 +206,20 @@ var ClusterCache = {
                     let randProc = processes[~~(Math.random() * processes.length)];
                     ClusterCache._getFromProc(key, randProc).then(value => {
                         if (value === undefined) {
-                            if(process.env.pm_id >= 0) ClusterCache.miss.mark();
+                            if (process.env.pm_id >= 0) ClusterCache.miss.mark();
                             return ok({
                                 data: defaultValue,
                                 metadata: metadata([], randProc)
                             })
                         } else {
-                            if(process.env.pm_id >= 0) ClusterCache.hit.mark();
+                            if (process.env.pm_id >= 0) ClusterCache.hit.mark();
                             return ok({
                                 data: value,
                                 metadata: metadata(processes, randProc)
                             });
                         }
                     }).catch(e => {
-                        if(process.env.pm_id >= 0) ClusterCache.miss.mark();
+                        if (process.env.pm_id >= 0) ClusterCache.miss.mark();
                         return ok({
                             data: defaultValue,
                             metadata: metadata([], randProc)
@@ -235,6 +255,15 @@ var ClusterCache = {
                     });
                 });
             });
+        },
+
+        write: async function (key, value, ttl) {
+            try {
+                await ClusterCache.set(key, value, ttl);
+                return true;
+            } catch (e) {
+                return false;
+            }
         },
 
         set: function (key, value, ttl) {
@@ -284,10 +313,16 @@ var ClusterCache = {
 ;
 
 module.exports = {
-    get: ClusterCache.get,
-    set: ClusterCache.set,
+    get: ClusterCache.read,
+    set: ClusterCache.write,
     delete: ClusterCache.delete,
     keys: ClusterCache.keys,
     flush: ClusterCache.flush,
-    init: ClusterCache.init
+    init: ClusterCache.init,
+    withMeta: () => {
+        return {
+            get: ClusterCache.get,
+            set: ClusterCache.set
+        }
+    }
 };

@@ -12,7 +12,7 @@ app.get("/set", (req, res) => {
     let key = req.query.key;
     let data = req.query.value;
     let ttl = req.query.ttl;
-    cache.set(key, data, ttl).then(meta => {
+    cache.withMeta().set(key, data, ttl).then(meta => {
         res.send({key: key, value: data, metadata: meta});
     });
 });
@@ -20,8 +20,25 @@ app.get("/set", (req, res) => {
 app.get("/get", (req, res) => {
     let key = req.query.key;
     let defaultValue = req.query.default || 'undefined';
-    cache.get(key, defaultValue).then(result => {
+    cache.withMeta().get(key, defaultValue).then(result => {
         res.send({key: key, value: result.data, metadata: result.metadata});
+    });
+});
+
+app.get("/write", (req, res) => {
+    let key = req.query.key;
+    let data = req.query.value;
+    let ttl = req.query.ttl;
+    cache.set(key, data, ttl).then(result => {
+        res.send({key: key, value: data, result: result});
+    });
+});
+
+app.get("/read", (req, res) => {
+    let key = req.query.key;
+    let defaultValue = req.query.default || 'undefined';
+    cache.get(key, defaultValue).then(result => {
+        res.send({key: key, value: result});
     });
 });
 

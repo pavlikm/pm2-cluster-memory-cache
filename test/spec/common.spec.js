@@ -1,13 +1,9 @@
 const frisby = require('frisby');
+const Joi = frisby.Joi;
 const ip = require("ip");
 const axios = require('axios');
 
 var BASE_URL = "http://" + ip.address() + ":8080";
-
-
-beforeEach(function (done) {
-    setTimeout(done, 100);
-});
 
 describe('/every storage type', () => {
     it('should be able to set value', (done) => {
@@ -16,6 +12,29 @@ describe('/every storage type', () => {
             .expect('status', 200)
             .expect('json', 'key', 'foo')
             .done(done);
+    });
+
+    it('should return metadata on get', (done) => {
+        axios.get(BASE_URL + "/set?key=homer&value=simpson&ttl=10000").then(() => {
+            return frisby
+                .get(BASE_URL + "/get?key=homer")
+                .expect('status', 200)
+                .expect('json', 'key', 'homer')
+                .expect('json', 'value', 'simpson')
+                .expect('jsonTypes', 'metadata', Joi.object())
+                .done(done);
+        });
+    });
+
+    it('should return only value on read', (done) => {
+        axios.get(BASE_URL + "/set?key=homer&value=simpson&ttl=10000").then(() => {
+            return frisby
+                .get(BASE_URL + "/read?key=homer")
+                .expect('status', 200)
+                .expect('json', 'key', 'homer')
+                .expect('json', 'value', 'simpson')
+                .done(done);
+        });
     });
 
     it('should be able to set value without ttl', (done) => {

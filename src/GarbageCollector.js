@@ -9,6 +9,7 @@ var GarbageCollector = {
             GarbageCollector.timer = setInterval(function () {
                 dr.optimize();
             }, ms);
+            GarbageCollector.timer.unref();
         }
     }
 };
