@@ -20,12 +20,17 @@ const pm2ClusterCache = require('pm2-cluster-cache');
 let cache = pm2ClusterCache.init({storage: "cluster"});
 
 //set value to cache for 1s
-cache.set('key', 'data', 1000).then(metadata => {
-    console.log(metadata);
+cache.set('key', 'data', 1000).then(() => {
+    console.log('ok');
 });
 
-//get value from cache
+//get cached value
 cache.get('key', "someDefaultValue").then(result => {
+    console.log(result);
+}); 
+
+//get value from cache with metadata
+cache.withMeta().get('key', "someDefaultValue").then(result => {
     console.log(result.data);
     console.log(result.metadata);
 });
@@ -46,13 +51,14 @@ cache.keys().then(map => {
     - `all` - store to all processes, read from actual process. Data are duplicated and on every process is stored full replica of all data. If one process restarts, other process are not affected with cache misses.
     - `master` - store to master, read from master. If actual process restarts, other process are not affected with cache miss, if actual process is not master. If master restarts, every process in cluster will lost all cached data.
     - `cluster` - store to specific process, read from specific process. Every process in cluster has part of data, so if one process restarts, other process will lost only part of data. Targer process for storage is detemined by key. 
-- `set(key, value, [ttl])` store value under key, with given ttl (in ms). Returns Promise with `metadata`.
-- `get(key, [defaultValue])` get value stored under key 'key'. In Promise returns object with obtained value, and `metadata`.
-- `delete(key)` removes key from all process where is given key stored. Returns in Promise array of processes deleted from.
-- `flush()` removes all keys from all processes.
-- `keys()` returns in Promise map of cluster with numbers of stored keys.
+- `set(key, value, [ttl])` - store value under key, with given ttl (in ms).
+- `get(key, [defaultValue])` - get value stored under key 'key'.
+- `delete(key)` - removes key from all process where is given key stored. Returns in Promise array of processes deleted from.
+- `flush()` - removes all keys from all processes.
+- `keys()` - returns in Promise map of cluster with numbers of stored keys.
+- `withMeta()` - returns decorated `get` and `set` method that are returning metadata with data.
 ---
-`metadata` object for methods `get` and `set` is object with keys:
+`metadata` object is object with keys:
 - `storedOn` - array of int. Processes that have key stored.
 - `readFrom` - int. Proccess which provided data.
 - `servedBy` - int. Actual process. 
