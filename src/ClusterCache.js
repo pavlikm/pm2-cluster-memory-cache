@@ -2,6 +2,7 @@ const pm2 = require("pm2");
 const crypto = require("crypto");
 import metadata from './metadata';
 import {dr, pr} from './repositories';
+import pm2monitor from './pm2Monitor';
 import {
     STORAGE_CLUSTER,
     STORAGE_SELF,
@@ -14,7 +15,7 @@ import {
     TOPIC_FLUSH
 } from "./const";
 
-var io = require('@pm2/io');
+
 
 var ClusterCache = {
 
@@ -24,18 +25,6 @@ var ClusterCache = {
             defaultTtl: 1000,
             logger: console
         },
-        hit: io.meter({
-            name: 'Cluster Cache hit Rate',
-            samples: 1,
-            timeframe: 1,
-            unit: 'hit/s'
-        }),
-        miss: io.meter({
-            name: 'Cluster Cache miss Rate',
-            samples: 1,
-            timeframe: 1,
-            unit: 'miss/s'
-        }),
 
         init: function (options) {
             if (ClusterCache.initialized) {
@@ -206,20 +195,20 @@ var ClusterCache = {
                     let randProc = processes[~~(Math.random() * processes.length)];
                     ClusterCache._getFromProc(key, randProc).then(value => {
                         if (value === undefined) {
-                            if (process.env.pm_id >= 0) ClusterCache.miss.mark();
+                            pm2monitor.miss();
                             return ok({
                                 data: defaultValue,
                                 metadata: metadata([], randProc)
                             })
                         } else {
-                            if (process.env.pm_id >= 0) ClusterCache.hit.mark();
+                            pm2monitor.hit();
                             return ok({
                                 data: value,
                                 metadata: metadata(processes, randProc)
                             });
                         }
                     }).catch(e => {
-                        if (process.env.pm_id >= 0) ClusterCache.miss.mark();
+                        pm2monitor.miss();
                         return ok({
                             data: defaultValue,
                             metadata: metadata([], randProc)
