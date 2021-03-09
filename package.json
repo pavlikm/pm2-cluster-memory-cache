@@ -1,6 +1,6 @@
 {
   "name": "pm2-cluster-cache",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "pm2 cluster memory cache with ttl and more possibilities of data store in cluster",
   "main": "lib/ClusterCache.js",
   "repository": {
