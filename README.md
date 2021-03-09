@@ -1,3 +1,7 @@
+[![Node.js CI](https://github.com/pavlikm/pm2-cluster-memory-cache/actions/workflows/node-build.yml/badge.svg)](https://github.com/pavlikm/pm2-cluster-memory-cache/actions/workflows/node-build.yml)
+[![CodeQL](https://github.com/pavlikm/pm2-cluster-memory-cache/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/pavlikm/pm2-cluster-memory-cache/actions/workflows/codeql-analysis.yml)
+
+
 # pm2 cluster memory cache
 A cluster memory cache for pm2 with some different possibilities of data store. 
 From version 1.0.5 is safe to use without pm2 too, but storage type will be forced to 'self'.
