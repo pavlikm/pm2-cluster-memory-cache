@@ -58,7 +58,7 @@ cache.keys().then(map => {
 - `set(key, value, [ttl])` - store value under key, with given ttl (in ms).
 - `get(key, [defaultValue])` - get value stored under key 'key'.
 - `inc(key)` - increment key by 1. If key not exists, creates it with value 0 and returns.
-- `dc(key)` - decrement key by 1. If key not exists, creates it with value 0 and returns.
+- `dec(key)` - decrement key by 1. If key not exists, creates it with value 0 and returns.
 - `delete(key)` - removes key from all process where is given key stored. Returns in Promise array of processes deleted from.
 - `flush()` - removes all keys from all processes.
 - `keys()` - returns in Promise map of cluster with numbers of stored keys.
