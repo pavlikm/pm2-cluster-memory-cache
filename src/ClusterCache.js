@@ -10,11 +10,12 @@ import {
     STORAGE_MASTER,
     TOPIC_GET,
     TOPIC_SET,
+    TOPIC_INC,
+    TOPIC_DEC,
     TOPIC_DELETE,
     TOPIC_KEYS,
     TOPIC_FLUSH
 } from "./const";
-
 
 
 var ClusterCache = {
@@ -22,7 +23,7 @@ var ClusterCache = {
         initialized: false,
         options: {
             storage: STORAGE_CLUSTER,
-            defaultTtl: 1000,
+            defaultTtl: 10000,
             logger: console
         },
 
@@ -80,6 +81,15 @@ var ClusterCache = {
                 if (packet.topic === TOPIC_GET) {
                     pm2.sendDataToProcessId(data.respond, {
                         data: dr.get(data.k),
+                        topic: data.cb
+                    }, function (e) {
+                    });
+                }
+
+                if (packet.topic === TOPIC_INC) {
+                    let newValue = dr.inc(data.k, data.v);
+                    pm2.sendDataToProcessId(data.respond, {
+                        data: newValue,
                         topic: data.cb
                     }, function (e) {
                     });
@@ -176,6 +186,34 @@ var ClusterCache = {
             }
         },
 
+        inc: async function (key) {
+            try {
+                let val = await ClusterCache.read(key, null);
+                if (val === null) {
+                    await ClusterCache.set(key, 0);
+                    return 0;
+                }
+                val = await ClusterCache.read(key, null);
+                await ClusterCache.incBy(key, 1);
+                return parseInt(val) + 1;
+            } catch (e) {
+            }
+        },
+
+        dec: async function (key) {
+            try {
+                let val = await ClusterCache.read(key, null);
+                if (val === null) {
+                    ClusterCache.write(key, 0);
+                    return 0;
+                } else {
+                    await ClusterCache.incBy(key, -1);
+                    return val - 1;
+                }
+            } catch (e) {
+            }
+        },
+
         read: async function (key, defaultValue) {
             try {
                 let value = await ClusterCache.get(key, defaultValue);
@@ -255,6 +293,32 @@ var ClusterCache = {
             }
         },
 
+        incBy: function (key, incByValue) {
+            return new Promise((ok, fail) => {
+                pr.getWriteProcess(key, ClusterCache.options.storage).then(processes => {
+                    processes.forEach((proc) => {
+                        return new Promise((ok, fail) => {
+                            if (parseInt(proc) === parseInt(process.env.pm_id)) {
+                                dr.inc(key, incByValue);
+                                return ok();
+                            } else {
+                                pm2.sendDataToProcessId(proc, {
+                                    data: {
+                                        k: key,
+                                        v: incByValue,
+                                    },
+                                    topic: TOPIC_INC
+                                }, function (e) {
+
+                                });
+                            }
+                        });
+                    });
+                    return ok();
+                });
+            });
+        },
+
         set: function (key, value, ttl) {
             return new Promise((ok, fail) => {
                 if (typeof key !== "string") {
@@ -304,6 +368,8 @@ var ClusterCache = {
 module.exports = {
     get: ClusterCache.read,
     set: ClusterCache.write,
+    inc: ClusterCache.inc,
+    dec: ClusterCache.dec,
     delete: ClusterCache.delete,
     keys: ClusterCache.keys,
     flush: ClusterCache.flush,

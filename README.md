@@ -57,6 +57,8 @@ cache.keys().then(map => {
     - `cluster` - store to specific process, read from specific process. Every process in cluster has part of data, so if one process restarts, other process will lost only part of data. Targer process for storage is detemined by key. 
 - `set(key, value, [ttl])` - store value under key, with given ttl (in ms).
 - `get(key, [defaultValue])` - get value stored under key 'key'.
+- `inc(key)` - increment key by 1. If key not exists, creates it with value 0 and returns.
+- `dc(key)` - decrement key by 1. If key not exists, creates it with value 0 and returns.
 - `delete(key)` - removes key from all process where is given key stored. Returns in Promise array of processes deleted from.
 - `flush()` - removes all keys from all processes.
 - `keys()` - returns in Promise map of cluster with numbers of stored keys.

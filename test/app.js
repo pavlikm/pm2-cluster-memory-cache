@@ -25,6 +25,20 @@ app.get("/get", (req, res) => {
     });
 });
 
+app.get("/inc", (req, res) => {
+   let key = req.query.key;
+   cache.inc(key).then(result => {
+       res.send({key: key, value: result});
+   })
+});
+
+app.get("/dec", (req, res) => {
+    let key = req.query.key;
+    cache.dec(key).then(result => {
+        res.send({key: key, value: result});
+    })
+});
+
 app.get("/write", (req, res) => {
     let key = req.query.key;
     let data = req.query.value;
