@@ -23,7 +23,7 @@ var ClusterCache = {
         initialized: false,
         options: {
             storage: STORAGE_CLUSTER,
-            defaultTtl: 10000,
+            defaultTtl: 1000,
             logger: console
         },
 
