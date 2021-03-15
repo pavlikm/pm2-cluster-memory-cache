@@ -95,5 +95,43 @@ describe('/storage type master', () => {
         });
 
     });
+
+    it('should inc key', (done) => {
+        axios.get(BASE_URL + "/set?key=foo&value=100&ttl=1000").then(() => {
+            return frisby
+                .get(BASE_URL + "/inc?key=foo")
+                .expect('status', 200)
+                .expect('json', 'key', "foo")
+                .expect('json', 'value', 101)
+                .done(done);
+        });
+    });
+
+    it('should dec key', (done) => {
+        axios.get(BASE_URL + "/set?key=foo&value=100&ttl=1000").then(() => {
+            return frisby
+                .get(BASE_URL + "/dec?key=foo")
+                .expect('status', 200)
+                .expect('json', 'key', "foo")
+                .expect('json', 'value', 99)
+                .done(done);
+        });
+
+    });
+
+    it('should inc and dec not exist key', (done) => {
+        frisby
+            .get(BASE_URL + "/dec?key=dec")
+            .expect('status', 200)
+            .expect('json', 'key', "dec")
+            .expect('json', 'value', 0)
+            .done(done);
+        frisby
+            .get(BASE_URL + "/inc?key=inc")
+            .expect('status', 200)
+            .expect('json', 'key', "inc")
+            .expect('json', 'value', 0)
+            .done(done);
+    });
 });
 
