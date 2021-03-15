@@ -5,7 +5,7 @@ const app = express();
 const server = http.createServer(app);
 import ClusterCache from '../src/ClusterCache';
 
-let type = "cluster";
+let type = "self";
 let cache = ClusterCache.init({storage: process.env.npm_lifecycle_event || type});
 
 app.get("/set", (req, res) => {
@@ -23,6 +23,20 @@ app.get("/get", (req, res) => {
     cache.withMeta().get(key, defaultValue).then(result => {
         res.send({key: key, value: result.data, metadata: result.metadata});
     });
+});
+
+app.get("/inc", (req, res) => {
+   let key = req.query.key;
+   cache.inc(key).then(result => {
+       res.send({key: key, value: result});
+   })
+});
+
+app.get("/dec", (req, res) => {
+    let key = req.query.key;
+    cache.dec(key).then(result => {
+        res.send({key: key, value: result});
+    })
 });
 
 app.get("/write", (req, res) => {

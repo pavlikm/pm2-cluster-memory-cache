@@ -17,6 +17,17 @@ var DataRepository = {
         });
     },
 
+    inc: function(key, byVal){
+
+        if(DataRepository.data.has(key)){
+            let value = DataRepository.data.get(key);
+            value.v = parseInt(value.v) + byVal;
+            DataRepository.data.set(key, value);
+            return value.v;
+        }
+        return 0;
+    },
+
     get: function (key) {
         return DataRepository.isValid(DataRepository.data.get(key)) ? DataRepository.data.get(key).v : '';
     },
@@ -49,6 +60,7 @@ var DataRepository = {
 module.exports = {
     get: DataRepository.get,
     set: DataRepository.set,
+    inc: DataRepository.inc,
     delete: DataRepository.delete,
     flush: DataRepository.flush,
     optimize: DataRepository.optimize,
