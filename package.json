@@ -1,6 +1,6 @@
 {
   "name": "pm2-cluster-cache",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "pm2 cluster memory cache with ttl and more possibilities of data store in cluster",
   "main": "lib/ClusterCache.js",
   "repository": {
@@ -30,7 +30,7 @@
   "author": "pavlikm",
   "license": "MIT",
   "dependencies": {
-    "pm2": "^4.5.5",
+    "pm2": "^4.5.6",
     "@pm2/io": "^4.3.5"
   },
   "devDependencies": {
