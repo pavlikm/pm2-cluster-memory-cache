@@ -18,7 +18,6 @@ var DataRepository = {
     },
 
     inc: function(key, byVal){
-
         if(DataRepository.data.has(key)){
             let value = DataRepository.data.get(key);
             value.v = parseInt(value.v) + byVal;
