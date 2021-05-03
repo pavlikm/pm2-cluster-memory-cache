@@ -148,7 +148,6 @@ var ClusterCache = {
             return new Promise(async (ok, fail) => {
                 let processes = await pr.getAll();
                 processes.forEach(p => {
-
                     pm2.sendDataToProcessId(p, {
                         data: {},
                         topic: TOPIC_FLUSH
@@ -221,7 +220,6 @@ var ClusterCache = {
             } catch (e) {
                 return defaultValue;
             }
-
         },
 
         get: function (key, defaultValue) {
@@ -259,7 +257,6 @@ var ClusterCache = {
 
         _getFromProc: function (key, proc) {
             return new Promise((ok, fail) => {
-
                 if (parseInt(process.env.pm_id) === parseInt(proc)) {
                     let data = dr.get(key);
                     return (data !== '') ? ok(data) : fail();
