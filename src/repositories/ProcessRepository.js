@@ -1,5 +1,5 @@
 import {STORAGE_ALL, STORAGE_CLUSTER, STORAGE_MASTER, STORAGE_SELF} from "../const";
-import metadata from "../metadata";
+require("to-item");
 
 const pm2 = require("pm2");
 
@@ -73,22 +73,7 @@ var ProcessRepository = {
                 }
                 default:
                 case STORAGE_CLUSTER: {
-                    var h = 0, i = key.length;
-                    while (i > 0) {
-                        h = (h << 5) - h + key.charCodeAt(--i) | 0;
-                    }
-                    h = Math.abs(h);
-
-                    for (var j = 0; j <= 9; j++) {
-                        for (var k = 0; k < nodes.length; k++) {
-                            var node = nodes[k];
-                            if ((h % 10) === node) {
-                                return ok([node]);
-                            }
-                        }
-                        h = parseInt(('' + h).substring(1) + ('' + h)[0]);
-                    }
-                    return ok([nodes[0]]);
+                    return ok([key.to(nodes)]);
                 }
             }
         })
