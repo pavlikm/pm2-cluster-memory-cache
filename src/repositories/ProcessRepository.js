@@ -73,7 +73,7 @@ var ProcessRepository = {
                 }
                 default:
                 case STORAGE_CLUSTER: {
-                    return ok([key.to(nodes)]);
+                    return ok([key.toItem(nodes)]);
                 }
             }
         })
